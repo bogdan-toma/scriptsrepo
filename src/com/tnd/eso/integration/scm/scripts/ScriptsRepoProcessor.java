@@ -1,7 +1,25 @@
+/**
+ * ScriptsRepo - Automatic deploy tool for SAP Sourcing scripts
+ * Copyright (C) 2016  Bogdan Toma
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+**/
 package com.tnd.eso.integration.scm.scripts;
 
 import java.io.File;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -16,7 +34,7 @@ import com.tnd.eso.integration.scm.scripts.repository.ReposioryParserFactory;
 import com.tnd.eso.integration.scm.scripts.repository.RepositoryParser;
 import com.tnd.eso.integration.scm.scripts.transporter.Transporter;
 import com.tnd.eso.integration.scm.scripts.transporter.TransporterFactory;
-import com.tnd.eso.integration.scm.scripts.xml.XmlHelper;
+import com.tnd.eso.integration.scm.scripts.util.XmlHelper;
 
 public class ScriptsRepoProcessor {
 	XmlHelper helper;
@@ -30,27 +48,23 @@ public class ScriptsRepoProcessor {
 	private RepositoryParser repoParser;
 
 	protected ScriptsRepoProcessor() {
-		ESO_DATA_DIR = ScriptsRepoApp.getProperties().getProperty(ESO_DATA_DIR);
-		ESO_UPLOAD_DIR = ScriptsRepoApp.getProperties().getProperty(ESO_UPLOAD_DIR);
+		ESO_DATA_DIR = ScriptsRepoApp.getProps().getProperty(ESO_DATA_DIR);
+		ESO_UPLOAD_DIR = ScriptsRepoApp.getProps().getProperty(ESO_UPLOAD_DIR);
 	}
 
 	public ScriptsRepoProcessor(String fileName) {
-		// Fetch repository parser
 		repoParser = ReposioryParserFactory.getParser();
 
-		// Fetch transporter
 		transporter = TransporterFactory.getTransporter();
 		transporter.setWorkingDir(ESO_DATA_DIR);
 
-		// Initialise DOM parser
 		domParser = new DOMParser();
 
-		// Open XML template doc
 		try {
 			helper = new XmlHelper();
 			domParser.parse(fileName);
 			doc = domParser.getDocument();
-			// Get the document's root XML node
+
 			root = doc.getChildNodes();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -59,7 +73,6 @@ public class ScriptsRepoProcessor {
 
 	public void process() {
 		try {
-			// Navigate down the hierarchy to get to the fields node
 			Node sapesourcing = helper.getNode("sapesourcing", root);
 			Node objects = helper.getNode("objects", sapesourcing.getChildNodes());
 			NodeList objectList = objects.getChildNodes();
@@ -74,17 +87,20 @@ public class ScriptsRepoProcessor {
 				NodeList fieldList = fields.getChildNodes();
 
 				String objectType = helper.getNodeAttr("classname", object);
-				String externalId = helper.getNodeValue("EXTERNAL_ID", fieldList);
+				String fileIdentifier = helper.getNodeValue(ScriptsRepoApp.getProps().getProperty("REPOSITORY_FILE_ID"), fieldList);
 
-				// transport data file
-				transporter.transport(repoParser.getFileContents(externalId));
-
-				if ("odp.doccommon.scripting.callable_script".equals(objectType)) {
-					helper.setNodeValue("DOCUMENT_DESCRIPTION", fieldList, repoParser.getLastCommitRevision(externalId + ".java"));
-				} else {
-					helper.setNodeValue("SCRIPT_VERSION", fieldList, repoParser.getLastCommitRevision(externalId + ".java"));
+				if ("doccommon.scripting.script_definition".equals(objectType)) {
+					helper.setNodeValue("SCRIPT_VERSION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
 				}
-				System.out.println("Processed: " + externalId);
+				// disabled due to broken SAP importer
+				else if ("odp.doccommon.scripting.callable_script".equals(objectType)) {
+					helper.setNodeValue("DOCUMENT_DESCRIPTION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
+				}
+
+				helper.setNodeValue("SCRIPT", fieldList, ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR") + fileIdentifier + ScriptsRepoApp.getProps().getProperty("DATA_FILE_EXTENSION"));
+
+				transporter.transport(repoParser.getFileContents(fileIdentifier));
+				System.out.println("Processed: " + fileIdentifier);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -93,7 +109,6 @@ public class ScriptsRepoProcessor {
 			repoParser.close();
 		}
 
-		// ** Transport XML import file(s)
 		transporter.setWorkingDir(ESO_UPLOAD_DIR);
 		File xmlFile = export();
 		System.out.println("XML generation complete.");
@@ -104,14 +119,14 @@ public class ScriptsRepoProcessor {
 	}
 
 	private File export() {
-		// write the content into xml file
 		try {
 			File temp = File.createTempFile("ZTND_SCRIPT_DEF_", ".xml");
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 			DOMSource source = new DOMSource(doc);
 			StreamResult result = new StreamResult(temp);
-			// StreamResult result = new StreamResult(System.out);
 			transformer.transform(source, result);
 			return temp;
 		} catch (Exception e) {
