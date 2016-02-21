@@ -45,5 +45,5 @@ The [import](#import) action will generate a `config.properties` file in the sam
 - **PASS** - *SSH password*
 
 
-[0.4-beta]:https://www.google.com
-[source]:https://github.io
+[0.4-beta]:https://sourceforge.net/projects/scriptsrepo/
+[source]:https://github.com/bogdan-toma/scriptsrepo
