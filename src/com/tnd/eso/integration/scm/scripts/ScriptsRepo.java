@@ -18,10 +18,12 @@
 package com.tnd.eso.integration.scm.scripts;
 
 public class ScriptsRepo {
-	private static String VERSION = "0.4-beta";
+	private static String VERSION = "0.4.1";
 
 	public static void main(String[] args) {
 		ScriptsRepoApp app = new ScriptsRepoApp();
+		System.out.println();
+
 		if (args.length != 1) {
 			printArgErr();
 			printHelp();

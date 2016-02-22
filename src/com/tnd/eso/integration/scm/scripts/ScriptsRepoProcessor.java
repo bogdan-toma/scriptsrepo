@@ -48,11 +48,11 @@ public class ScriptsRepoProcessor {
 	private RepositoryParser repoParser;
 
 	protected ScriptsRepoProcessor() {
-		ESO_DATA_DIR = ScriptsRepoApp.getProps().getProperty(ESO_DATA_DIR);
-		ESO_UPLOAD_DIR = ScriptsRepoApp.getProps().getProperty(ESO_UPLOAD_DIR);
 	}
 
 	public ScriptsRepoProcessor(String fileName) {
+		ESO_DATA_DIR = ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR");
+		ESO_UPLOAD_DIR = ScriptsRepoApp.getProps().getProperty("ESO_UPLOAD_DIR");
 		repoParser = ReposioryParserFactory.getParser();
 
 		transporter = TransporterFactory.getTransporter();
@@ -89,6 +89,12 @@ public class ScriptsRepoProcessor {
 				String objectType = helper.getNodeAttr("classname", object);
 				String fileIdentifier = helper.getNodeValue(ScriptsRepoApp.getProps().getProperty("REPOSITORY_FILE_ID"), fieldList);
 
+				File scriptDataFile = repoParser.getFileContents(fileIdentifier);
+				if (!scriptDataFile.exists()) {
+					System.out.println("WARNING: File " + fileIdentifier + " does not exist in repository! Skipping.");
+					continue;
+				}
+
 				if ("doccommon.scripting.script_definition".equals(objectType)) {
 					helper.setNodeValue("SCRIPT_VERSION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
 				}
@@ -99,7 +105,7 @@ public class ScriptsRepoProcessor {
 
 				helper.setNodeValue("SCRIPT", fieldList, ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR") + fileIdentifier + ScriptsRepoApp.getProps().getProperty("DATA_FILE_EXTENSION"));
 
-				transporter.transport(repoParser.getFileContents(fileIdentifier));
+				transporter.transport(scriptDataFile);
 				System.out.println("Processed: " + fileIdentifier);
 			}
 		} catch (Exception e) {

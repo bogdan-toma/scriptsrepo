@@ -29,17 +29,17 @@ import com.jcraft.jsch.SftpException;
 import com.tnd.eso.integration.scm.scripts.ScriptsRepoApp;
 
 public class SshTransporter implements Transporter {
-
-	private static String HOST = ScriptsRepoApp.getProps().getProperty("HOST");
-	private static int PORT = Integer.parseInt(ScriptsRepoApp.getProps().getProperty("PORT"));
-	private static String USER = ScriptsRepoApp.getProps().getProperty("USER");
-	private static String PASS = ScriptsRepoApp.getProps().getProperty("PASS");
-	private static Session session;
-	private static Channel channel;
-	private static ChannelSftp channelSftp;
+	private Session session;
+	private Channel channel;
+	private ChannelSftp channelSftp;
 
 	protected SshTransporter() {
 		try {
+			String HOST = ScriptsRepoApp.getProps().getProperty("HOST");
+			int PORT = Integer.parseInt(ScriptsRepoApp.getProps().getProperty("PORT"));
+			String USER = ScriptsRepoApp.getProps().getProperty("USER");
+			String PASS = ScriptsRepoApp.getProps().getProperty("PASS");
+
 			JSch jsch = new JSch();
 			session = jsch.getSession(USER, HOST, PORT);
 			session.setPassword(new String(PASS));

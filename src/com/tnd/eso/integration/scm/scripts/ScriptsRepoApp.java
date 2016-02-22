@@ -88,6 +88,7 @@ public class ScriptsRepoApp {
 
 		Transporter transporter = TransporterFactory.getTransporter();
 		System.out.println("Initialised file transporter.");
+		System.out.println();
 
 		try {
 			ScriptsRepoProcessor scriptXmlParser = new ScriptsRepoProcessor(path + RESOURCES_DIR + TEMPLATE_FILENAME);

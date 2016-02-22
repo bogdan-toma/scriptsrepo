@@ -145,7 +145,6 @@ public class TemplateGenerator {
 		}
 		xmlImportScript.setScriptVersion("DUMMY");
 		xmlImportScript.setScript("DUMMY");
-		System.out.println("Processed import: " + xmlImportScript.getDisplayName());
 
 		return xmlImportScript;
 	}

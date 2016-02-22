@@ -58,6 +58,11 @@ public class XmlTemplateGenerator {
 	}
 
 	public void addScript(XmlImportScriptBo script) {
+		if (Boolean.valueOf(script.getInactive())) {
+			System.out.println("Skipped import - inactive script: " + script.getDisplayName());
+			return;
+		}
+
 		Element object = doc.createElement("object");
 		object.setAttribute("classname", "doccommon.scripting.script_definition");
 
@@ -109,6 +114,7 @@ public class XmlTemplateGenerator {
 		fields.appendChild(scriptFile);
 
 		objectsElement.appendChild(object);
+		System.out.println("Processed import: " + script.getDisplayName());
 	}
 
 	public void write() {

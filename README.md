@@ -4,16 +4,14 @@ ScriptsRepo is a tool that allows developers to automatically deploy BeanShell
 scripts from a locally managed repository to a SAP Sourcing application server.
 
 ## Latest release
-The most recent release is ScriptsRepo [0.4-beta].
-
-[0.4-beta]:https://www.google.com
+The most recent release is ScriptsRepo [0.4.1].
 
 ## Installing ScriptsRepo
 Download latest release jar or build from [source].
 ## Running ScriptsRepo
 ### Import
 ```sh
-java -jar scriptsrepo-0.4-beta.jar --import
+java -jar scriptsrepo-0.4.1.jar --import
 ```
 - Initialise resources 
 - Generate [config.properties](#configuration) file *(only if not existent)*.
@@ -21,7 +19,7 @@ java -jar scriptsrepo-0.4-beta.jar --import
 
 ###Deploy
 ```sh
-java -jar scriptsrepo-0.4-beta.jar --deploy
+java -jar scriptsrepo-0.4.1.jar --deploy
 ```
 - Generate import metadata
 - Push data files and metadata to configured directory via deploy channel
@@ -29,7 +27,7 @@ java -jar scriptsrepo-0.4-beta.jar --deploy
 ### Configuration
 The [import](#import) action will generate a `config.properties` file in the same directory as the jar. The parameters and possible options are:
 - **REPOSITORY_TYPE** - *type of source control management repository*
-    - `GIT` - 
+    - `GIT`
     - `LOCAL` - *if files are just stored locally without any SCM*
 - **REPOSITORY_DIR** - *absolute path to location of script files*
 - **REPOSITORY_FILE_ID** - *must be a metadata of the script definition; this is used to link the script with the local file. eg: `EXTERNAL_ID`, where local file is named `EXTERNAL_ID`**.**`DATA_FILE_EXTENSION`*
@@ -37,7 +35,7 @@ The [import](#import) action will generate a `config.properties` file in the sam
 - **ESO_DATA_DIR** - *remote directory where to publish script data files*
 - **ESO_UPLOAD_DIR** - *remote directory where to publish script import medatada xml*
 - **TRANSPORT_PROTOCOL** - *transport protocol for scripts deployment to app server*
-    - `SSH`
+    - `SFTP`
     - `DUMMY` - *test protocol, displays resulting metadata xml to console*
 - **HOST** - *SSH host - irrelevant when `TRANSPORT_PROTOCOL` is `DUMMY`*
 - **PORT** - *SSH port*
@@ -45,5 +43,5 @@ The [import](#import) action will generate a `config.properties` file in the sam
 - **PASS** - *SSH password*
 
 
-[0.4-beta]:https://sourceforge.net/projects/scriptsrepo/
+[0.4.1]:https://sourceforge.net/projects/scriptsrepo/
 [source]:https://github.com/bogdan-toma/scriptsrepo
