@@ -78,7 +78,10 @@ public class TemplateGenerator {
 					xmlTemplateGenerator.addScript(generateScriptDefinitionBo(fields, objectType));
 					break;
 				case "odp.doccommon.scripting.callable_script":
-					xmlTemplateGenerator.addScript(generateExplicitScriptBo(fields, objectType));
+
+					// Import Explicitly Called Scripts only for ESO V10+
+					if (Integer.valueOf(ScriptsRepoApp.getProps().getProperty("ESO_VERSION")).compareTo(10) >= 0)
+						xmlTemplateGenerator.addScript(generateExplicitScriptBo(fields, objectType));
 					break;
 				default:
 					continue;
