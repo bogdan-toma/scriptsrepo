@@ -57,14 +57,14 @@ public class XmlTemplateGenerator {
 		}
 	}
 
-	public void addScript(XmlImportScriptBo script) {
+	public void addScript(XmlImportScriptIface script) {
 		if (Boolean.valueOf(script.getInactive())) {
 			System.out.println("Skipped import - inactive script: " + script.getDisplayName());
 			return;
 		}
 
 		Element object = doc.createElement("object");
-		object.setAttribute("classname", "doccommon.scripting.script_definition");
+		object.setAttribute("classname", script.getType());
 
 		Element fields = doc.createElement("fields");
 		object.appendChild(fields);
@@ -77,41 +77,45 @@ public class XmlTemplateGenerator {
 		displayName.appendChild(doc.createTextNode(script.getDisplayName()));
 		fields.appendChild(displayName);
 
-		Element scriptContext = doc.createElement("SCRIPT_CONTEXT");
-		scriptContext.appendChild(doc.createTextNode(script.getScriptContext()));
-		fields.appendChild(scriptContext);
-
-		Element busUnitContext = doc.createElement("BUS_UNIT_CTXT");
-		busUnitContext.appendChild(doc.createTextNode(script.getBusUnitContext()));
-		fields.appendChild(busUnitContext);
-
-		Element targetClassId = doc.createElement("TARGET_CLASS_ID");
-		targetClassId.appendChild(doc.createTextNode(script.getTargetClassId()));
-		fields.appendChild(targetClassId);
-
-		Element targetInstanceType = doc.createElement("TARGET_INSTANCE_TYPE");
-		targetInstanceType.appendChild(doc.createTextNode(script.getTargetInstanceType()));
-		fields.appendChild(targetInstanceType);
-
-		Element target = doc.createElement("TARGET");
-		target.appendChild(doc.createTextNode(script.getTarget()));
-		fields.appendChild(target);
-
-		Element documentDescription = doc.createElement("DOCUMENT_DESCRIPTION");
-		documentDescription.appendChild(doc.createTextNode(script.getDocumentDescription()));
-		fields.appendChild(documentDescription);
+		Element scriptFile = doc.createElement("SCRIPT");
+		scriptFile.appendChild(doc.createTextNode(script.getScript()));
+		fields.appendChild(scriptFile);
 
 		Element inactive = doc.createElement("INACTIVE");
 		inactive.appendChild(doc.createTextNode(script.getInactive()));
 		fields.appendChild(inactive);
 
-		Element scriptVersion = doc.createElement("SCRIPT_VERSION");
-		scriptVersion.appendChild(doc.createTextNode("DUMMY"));
-		fields.appendChild(scriptVersion);
+		Element documentDescription = doc.createElement("DOCUMENT_DESCRIPTION");
+		documentDescription.appendChild(doc.createTextNode(script.getDocumentDescription()));
+		fields.appendChild(documentDescription);
 
-		Element scriptFile = doc.createElement("SCRIPT");
-		scriptFile.appendChild(doc.createTextNode(script.getScript()));
-		fields.appendChild(scriptFile);
+		if (script instanceof XmlImportScriptDefinitionBo) {
+			XmlImportScriptDefinitionBo castScript = (XmlImportScriptDefinitionBo) script;
+
+			Element scriptContext = doc.createElement("SCRIPT_CONTEXT");
+			scriptContext.appendChild(doc.createTextNode(castScript.getScriptContext()));
+			fields.appendChild(scriptContext);
+
+			Element busUnitContext = doc.createElement("BUS_UNIT_CTXT");
+			busUnitContext.appendChild(doc.createTextNode(castScript.getBusUnitContext()));
+			fields.appendChild(busUnitContext);
+
+			Element targetClassId = doc.createElement("TARGET_CLASS_ID");
+			targetClassId.appendChild(doc.createTextNode(castScript.getTargetClassId()));
+			fields.appendChild(targetClassId);
+
+			Element targetInstanceType = doc.createElement("TARGET_INSTANCE_TYPE");
+			targetInstanceType.appendChild(doc.createTextNode(castScript.getTargetInstanceType()));
+			fields.appendChild(targetInstanceType);
+
+			Element target = doc.createElement("TARGET");
+			target.appendChild(doc.createTextNode(castScript.getTarget()));
+			fields.appendChild(target);
+
+			Element scriptVersion = doc.createElement("SCRIPT_VERSION");
+			scriptVersion.appendChild(doc.createTextNode(castScript.getScriptVersion()));
+			fields.appendChild(scriptVersion);
+		}
 
 		objectsElement.appendChild(object);
 		System.out.println("Processed import: " + script.getDisplayName());

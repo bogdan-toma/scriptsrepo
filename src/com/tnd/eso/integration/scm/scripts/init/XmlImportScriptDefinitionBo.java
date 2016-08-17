@@ -17,34 +17,13 @@
 **/
 package com.tnd.eso.integration.scm.scripts.init;
 
-public class XmlImportScriptBo {
-	private String externalId;
-	private String displayName;
+public class XmlImportScriptDefinitionBo extends AbxXmlImportScriptBo {
 	private String scriptContext;
 	private String busUnitContext;
 	private String targetClassId;
 	private String targetInstanceType;
 	private String target;
-	private String documentDescription;
-	private String inactive;
 	private String scriptVersion;
-	private String script;
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
 
 	public String getScriptContext() {
 		return scriptContext;
@@ -87,35 +66,11 @@ public class XmlImportScriptBo {
 		this.target = target;
 	}
 
-	public String getDocumentDescription() {
-		return documentDescription;
-	}
-
-	public void setDocumentDescription(String documentDescription) {
-		this.documentDescription = documentDescription;
-	}
-
-	public String getInactive() {
-		return inactive;
-	}
-
-	public void setInactive(String inactive) {
-		this.inactive = inactive;
-	}
-
 	public String getScriptVersion() {
 		return scriptVersion;
 	}
 
 	public void setScriptVersion(String scriptVersion) {
 		this.scriptVersion = scriptVersion;
-	}
-
-	public String getScript() {
-		return script;
-	}
-
-	public void setScript(String script) {
-		this.script = script;
 	}
 }

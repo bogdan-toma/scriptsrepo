@@ -31,6 +31,7 @@ import com.tnd.eso.integration.scm.scripts.util.ZipHelper;
 public class TemplateGenerator {
 	private final String path;
 	private final String ZIP_TEMP_DIR = "allscripts" + File.separator;
+	private final String DUMMY_TEXT = "DUMMY";
 	private XmlHelper helper;
 
 	public TemplateGenerator(String currentPath) {
@@ -70,12 +71,18 @@ public class TemplateGenerator {
 					continue;
 
 				String objectType = helper.getNodeAttr("class", object);
-				if (!"doccommon.scripting.script_definition".equals(objectType))
-					continue;
-
 				Node fields = helper.getNode("fields", object.getChildNodes());
 
-				xmlTemplateGenerator.addScript(generateBo(fields));
+				switch (objectType) {
+				case "doccommon.scripting.script_definition":
+					xmlTemplateGenerator.addScript(generateScriptDefinitionBo(fields, objectType));
+					break;
+				case "odp.doccommon.scripting.callable_script":
+					xmlTemplateGenerator.addScript(generateExplicitScriptBo(fields, objectType));
+					break;
+				default:
+					continue;
+				}
 			}
 
 			xmlTemplateGenerator.write();
@@ -100,9 +107,11 @@ public class TemplateGenerator {
 			oldTemplate.delete();
 	}
 
-	private XmlImportScriptBo generateBo(Node node) {
+	private XmlImportScriptIface generateScriptDefinitionBo(Node node, String type) {
+		XmlImportScriptDefinitionBo xmlImportScript = new XmlImportScriptDefinitionBo();
+		xmlImportScript.setType(type);
+
 		NodeList fieldList = node.getChildNodes();
-		XmlImportScriptBo xmlImportScript = new XmlImportScriptBo();
 
 		for (int j = 0; j < fieldList.getLength(); j++) {
 			Node field = fieldList.item(j);
@@ -143,8 +152,44 @@ public class TemplateGenerator {
 				break;
 			}
 		}
-		xmlImportScript.setScriptVersion("DUMMY");
-		xmlImportScript.setScript("DUMMY");
+		xmlImportScript.setScriptVersion(DUMMY_TEXT);
+		xmlImportScript.setScript(DUMMY_TEXT);
+
+		return xmlImportScript;
+	}
+
+	private XmlImportScriptIface generateExplicitScriptBo(Node node, String type) {
+		XmlImportExplicitScriptBo xmlImportScript = new XmlImportExplicitScriptBo();
+		xmlImportScript.setType(type);
+
+		NodeList fieldList = node.getChildNodes();
+
+		for (int j = 0; j < fieldList.getLength(); j++) {
+			Node field = fieldList.item(j);
+			if (!"field".equals(field.getNodeName()))
+				continue;
+
+			String fieldType = helper.getNodeAttr("name", field);
+
+			switch (fieldType) {
+			case "EXTERNAL_ID":
+				xmlImportScript.setExternalId(helper.getNodeValue(field));
+				break;
+			case "DISPLAY_NAME":
+				xmlImportScript.setDisplayName(helper.getNodeValue(field));
+				break;
+			case "DOCUMENT_DESCRIPTION":
+				xmlImportScript.setDocumentDescription(helper.getNodeValue(field));
+				break;
+			case "INACTIVE":
+				xmlImportScript.setInactive(helper.getNodeValue(field));
+				break;
+			default:
+				break;
+			}
+		}
+		xmlImportScript.setDocumentDescription(DUMMY_TEXT);
+		xmlImportScript.setScript(DUMMY_TEXT);
 
 		return xmlImportScript;
 	}

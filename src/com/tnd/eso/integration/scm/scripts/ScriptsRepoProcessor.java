@@ -98,7 +98,6 @@ public class ScriptsRepoProcessor {
 				if ("doccommon.scripting.script_definition".equals(objectType)) {
 					helper.setNodeValue("SCRIPT_VERSION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
 				}
-				// disabled due to broken SAP importer
 				else if ("odp.doccommon.scripting.callable_script".equals(objectType)) {
 					helper.setNodeValue("DOCUMENT_DESCRIPTION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
 				}
