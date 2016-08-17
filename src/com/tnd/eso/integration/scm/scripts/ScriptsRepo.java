@@ -18,7 +18,7 @@
 package com.tnd.eso.integration.scm.scripts;
 
 public class ScriptsRepo {
-	private static String VERSION = "0.4.1";
+	private static String VERSION = "0.5";
 
 	public static void main(String[] args) {
 		ScriptsRepoApp app = new ScriptsRepoApp();
