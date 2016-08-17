@@ -19,7 +19,6 @@ package com.tnd.eso.integration.scm.scripts;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -43,7 +42,36 @@ public class ScriptsRepoApp {
 		return prop;
 	}
 
-	protected void loadProps() throws IOException {
+	protected void runImport() {
+		try {
+			if (!initCheck())
+				return;
+			generateConfig();
+			init();
+			importScripts();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	protected void runDeploy() {
+		try {
+			loadProps();
+			if (!writeConfigDefaults()) {
+				process();
+			} else {
+				System.out.println("WARNING - config.properties file was updated!");
+				System.out.println("Please check and re-execute --deploy.");
+				System.out.println();
+			}
+		} catch (IOException e) {
+			System.out.println("Could not load config.properties file. Aborting.");
+			e.printStackTrace();
+		}
+
+	}
+
+	private void loadProps() throws IOException {
 		InputStream input = null;
 		try {
 			input = new FileInputStream(path + CONFIG_FILENAME);
@@ -59,30 +87,7 @@ public class ScriptsRepoApp {
 		}
 	}
 
-	protected void runImport() {
-		try {
-			if (!initCheck())
-				return;
-			generateConfig();
-			init();
-			importScripts();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
-
-	protected void runDeploy() {
-		try {
-			loadProps();
-			process();
-		} catch (IOException e) {
-			System.out.println("Could not load config.properties file. Aborting.");
-			e.printStackTrace();
-		}
-
-	}
-
-	protected void process() {
+	private void process() {
 		RepositoryParser repoParser = ReposioryParserFactory.getParser();
 		System.out.println("Initialised git repository.");
 
@@ -99,27 +104,91 @@ public class ScriptsRepoApp {
 		}
 	}
 
-	protected void generateConfig() throws FileNotFoundException {
+	private boolean writeConfigDefaults() throws IOException {
 		File f = new File(path + CONFIG_FILENAME);
-		if (f.exists())
-			return;
-
-		PrintWriter writer = new PrintWriter(f);
-		writer.println("REPOSITORY_TYPE=GIT");
-		writer.println("REPOSITORY_DIR=C:/Users/DummyUser/Projects/CLMX/Scripts/");
-		writer.println("REPOSITORY_FILE_ID=EXTERNAL_ID");
-		writer.println("DATA_FILE_EXTENSION=.java");
-		writer.println("ESO_DATA_DIR=/usr/sap/server/clm/scriptsrepo/Import/Data/");
-		writer.println("ESO_UPLOAD_DIR=/usr/sap/server/clm/scriptsrepo/Import/Upload/");
-		writer.println("TRANSPORT_PROTOCOL=DUMMY");
-		writer.println("HOST=ssh.corporate.com");
-		writer.println("PORT=22");
-		writer.println("USER=username");
-		writer.println("PASS=password");
-		writer.close();
+		boolean configUpdated = setConfigDefaults();
+		if (configUpdated) {
+			PrintWriter writer = new PrintWriter(f);
+			prop.store(writer, null);
+			writer.close();
+		}
+		return configUpdated;
 	}
 
-	protected boolean initCheck() {
+	private void generateConfig() throws IOException {
+		File f = new File(path + CONFIG_FILENAME);
+		if (f.exists())
+			loadProps();
+
+		writeConfigDefaults();
+	}
+
+	private boolean setConfigDefaults() {
+		boolean changed = false;
+
+		if (prop.getProperty("REPOSITORY_TYPE") == null) {
+			prop.put("REPOSITORY_TYPE", "GIT");
+			changed = true;
+		}
+
+		if (prop.getProperty("REPOSITORY_DIR") == null) {
+			prop.put("REPOSITORY_DIR", "C:/Users/DummyUser/Projects/CLMX/Scripts/");
+			changed = true;
+		}
+
+		if (prop.getProperty("REPOSITORY_FILE_ID") == null) {
+			prop.put("REPOSITORY_FILE_ID", "EXTERNAL_ID");
+			changed = true;
+		}
+
+		if (prop.getProperty("DATA_FILE_EXTENSION") == null) {
+			prop.put("DATA_FILE_EXTENSION", ".java");
+			changed = true;
+		}
+
+		if (prop.getProperty("ESO_DATA_DIR") == null) {
+			prop.put("ESO_DATA_DIR", "/usr/sap/server/clm/scriptsrepo/Import/Data/");
+			changed = true;
+		}
+
+		if (prop.getProperty("ESO_UPLOAD_DIR") == null) {
+			prop.put("ESO_UPLOAD_DIR", "/usr/sap/server/clm/scriptsrepo/Import/Upload/");
+			changed = true;
+		}
+
+		if (prop.getProperty("TRANSPORT_PROTOCOL") == null) {
+			prop.put("TRANSPORT_PROTOCOL", "DUMMY");
+			changed = true;
+		}
+
+		if (prop.getProperty("HOST") == null) {
+			prop.put("HOST", "ssh.corporate.com");
+			changed = true;
+		}
+
+		if (prop.getProperty("PORT") == null) {
+			prop.put("PORT", "22");
+			changed = true;
+		}
+
+		if (prop.getProperty("USER") == null) {
+			prop.put("USER", "username");
+			changed = true;
+		}
+
+		if (prop.getProperty("PASS") == null) {
+			prop.put("PASS", "password");
+			changed = true;
+		}
+
+		if (prop.getProperty("ESO_VERSION") == null) {
+			prop.put("ESO_VERSION", "9");
+			changed = true;
+		}
+		return changed;
+	}
+
+	private boolean initCheck() {
 		File f = new File(path + OMA_IMPORT_FILE);
 		if (!f.exists()) {
 			System.out.println("Import oma file " + OMA_IMPORT_FILE + " not found!");
@@ -128,7 +197,7 @@ public class ScriptsRepoApp {
 		return true;
 	}
 
-	protected void init() {
+	private void init() {
 		File resDir = new File(path + RESOURCES_DIR);
 		if (!resDir.exists()) {
 			System.out.println("Creating directory " + RESOURCES_DIR);
@@ -136,7 +205,7 @@ public class ScriptsRepoApp {
 		}
 	}
 
-	protected void importScripts() {
+	private void importScripts() {
 		TemplateGenerator templateGenerator = new TemplateGenerator(path);
 		templateGenerator.process();
 	}
