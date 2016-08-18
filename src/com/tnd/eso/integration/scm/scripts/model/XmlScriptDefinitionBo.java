@@ -15,14 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-package com.tnd.eso.integration.scm.scripts.init;
+package com.tnd.eso.integration.scm.scripts.model;
 
-public class XmlImportScriptDefinitionBo extends AbxXmlImportScriptBo {
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Path;
+
+public class XmlScriptDefinitionBo extends AbxXmlScriptBo {
+	@Element(name = "SCRIPT_CONTEXT")
+	@Path("fields")
 	private String scriptContext;
+
+	@Element(name = "BUS_UNIT_CTXT")
+	@Path("fields")
 	private String busUnitContext;
+
+	@Element(name = "TARGET_CLASS_ID")
+	@Path("fields")
 	private String targetClassId;
+
+	@Element(name = "TARGET_INSTANCE_TYPE")
+	@Path("fields")
 	private String targetInstanceType;
+
+	@Element(name = "TARGET")
+	@Path("fields")
 	private String target;
+
+	@Element(name = "SCRIPT_VERSION")
+	@Path("fields")
 	private String scriptVersion;
 
 	public String getScriptContext() {

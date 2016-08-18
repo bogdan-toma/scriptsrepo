@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-package com.tnd.eso.integration.scm.scripts.init;
+package com.tnd.eso.integration.scm.scripts.model;
 
-public class XmlImportExplicitScriptBo extends AbxXmlImportScriptBo {
+public class XmlScriptExplicitBo extends AbxXmlScriptBo {
 }
