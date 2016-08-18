@@ -70,10 +70,11 @@ public class ScriptsRepoProcessor {
 			for (int i = scripts.size() - 1; i >= 0; i--) {
 				XmlScriptIface script = scripts.get(i);
 
-				// skip inactive
-				if (Boolean.valueOf(script.getInactive())) {
-					scripts.remove(i);
-					continue;
+				if (!Boolean.valueOf(ScriptsRepoApp.getProps().getProperty("DEPLOY_INACTIVE"))) {
+					if (Boolean.valueOf(script.getInactive())) {
+						scripts.remove(i);
+						continue;
+					}
 				}
 
 				String fileIdentifier = "";

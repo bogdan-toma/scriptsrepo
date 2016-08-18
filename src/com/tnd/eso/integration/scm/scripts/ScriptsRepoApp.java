@@ -193,6 +193,10 @@ public class ScriptsRepoApp {
 			prop.put("ESO_VERSION", "9");
 			changed = true;
 		}
+
+		if (prop.getProperty("DEPLOY_INACTIVE") == null) {
+			prop.put("DEPLOY_INACTIVE", "false");
+		}
 		return changed;
 	}
 
