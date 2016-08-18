@@ -101,9 +101,8 @@ public class ScriptsRepoApp {
 			ScriptsRepoProcessor scriptXmlParser = new ScriptsRepoProcessor(path + RESOURCES_DIR + TEMPLATE_FILENAME);
 			scriptXmlParser.process();
 		} catch (InstantiationException ie) {
-			System.out.println("ERROR: Cannot load scripts. Please execute --import");
+			System.out.println("ERROR: Cannot load scripts. Please execute with --import option.");
 			System.out.println();
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
