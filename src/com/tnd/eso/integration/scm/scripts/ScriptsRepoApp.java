@@ -98,6 +98,8 @@ public class ScriptsRepoApp {
 		try {
 			ScriptsRepoProcessor scriptXmlParser = new ScriptsRepoProcessor(path + RESOURCES_DIR + TEMPLATE_FILENAME);
 			scriptXmlParser.process();
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			repoParser.close();
 			transporter.close();

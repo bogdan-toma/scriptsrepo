@@ -15,14 +15,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-package com.tnd.eso.integration.scm.scripts.init;
+package com.tnd.eso.integration.scm.scripts.model;
 
-public class AbxXmlImportScriptBo implements XmlImportScriptIface {
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Path;
+
+public class AbxXmlScriptBo implements XmlScriptIface {
+	@Attribute(name = "classname")
 	private String type;
+
+	@Element(name = "EXTERNAL_ID")
+	@Path("fields")
 	private String externalId;
+
+	@Element(name = "DISPLAY_NAME")
+	@Path("fields")
 	private String displayName;
+
+	@Element(name = "DOCUMENT_DESCRIPTION")
+	@Path("fields")
 	private String documentDescription;
+
+	@Element(name = "SCRIPT")
+	@Path("fields")
 	private String script;
+
+	@Element(name = "INACTIVE")
+	@Path("fields")
 	private String inactive;
 
 	public String getType() {
@@ -33,7 +53,7 @@ public class AbxXmlImportScriptBo implements XmlImportScriptIface {
 		this.type = type;
 	}
 
-	public AbxXmlImportScriptBo() {
+	public AbxXmlScriptBo() {
 		super();
 	}
 

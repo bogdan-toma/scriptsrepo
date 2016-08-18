@@ -15,31 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-package com.tnd.eso.integration.scm.scripts.init;
+package com.tnd.eso.integration.scm.scripts.model;
 
-public interface XmlImportScriptIface {
-
-	String getExternalId();
-
-	void setExternalId(String externalId);
-
-	String getDisplayName();
-
-	void setDisplayName(String displayName);
-
-	String getDocumentDescription();
-
-	void setDocumentDescription(String documentDescription);
-
-	String getScript();
-
-	void setScript(String script);
-
-	String getInactive();
-
-	void setInactive(String inactive);
-
-	String getType();
-
-	void setType(String type);
+public class XmlScriptExplicitBo extends AbxXmlScriptBo {
 }
