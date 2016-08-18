@@ -25,28 +25,28 @@ public class ScriptsRepo {
 		System.out.println();
 
 		if (args.length != 1) {
+			printCopy();
 			printArgErr();
 			printHelp();
-			printCopy();
 			return;
 		}
 
 		String arg = args[0];
 		if ("--import".equals(arg)) {
+			printCopy();
 			app.runImport();
 			System.out.println("DONE");
-			printCopy();
 			return;
 		}
 		if ("--help".equals(arg)) {
-			printHelp();
 			printCopy();
+			printHelp();
 			return;
 		}
 		if ("--deploy".equals(arg)) {
+			printCopy();
 			app.runDeploy();
 			System.out.println("DONE");
-			printCopy();
 			return;
 		}
 	}
@@ -67,10 +67,10 @@ public class ScriptsRepo {
 	}
 
 	private static void printCopy() {
-		System.out.println();
 		System.out.println("ScriptsRepo  Copyright (C) 2016  Bogdan Toma");
 		System.out.println("This program comes with ABSOLUTELY NO WARRANTY.");
 		System.out.println("This is free software, and you are welcome to redistribute it");
 		System.out.println("under certain conditions; please see LICENCE file for details.");
+		System.out.println();
 	}
 }
