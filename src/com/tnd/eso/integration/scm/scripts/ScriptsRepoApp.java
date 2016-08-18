@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Properties;
 
+import org.simpleframework.xml.core.InstantiationException;
+
 import com.tnd.eso.integration.scm.scripts.init.TemplateGenerator;
 import com.tnd.eso.integration.scm.scripts.repository.ReposioryParserFactory;
 import com.tnd.eso.integration.scm.scripts.repository.RepositoryParser;
@@ -98,6 +100,10 @@ public class ScriptsRepoApp {
 		try {
 			ScriptsRepoProcessor scriptXmlParser = new ScriptsRepoProcessor(path + RESOURCES_DIR + TEMPLATE_FILENAME);
 			scriptXmlParser.process();
+		} catch (InstantiationException ie) {
+			System.out.println("ERROR: Cannot load scripts. Please execute --import");
+			System.out.println();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
