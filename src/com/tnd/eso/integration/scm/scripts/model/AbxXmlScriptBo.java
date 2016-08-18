@@ -53,10 +53,6 @@ public class AbxXmlScriptBo implements XmlScriptIface {
 		this.type = type;
 	}
 
-	public AbxXmlScriptBo() {
-		super();
-	}
-
 	public String getExternalId() {
 		return externalId;
 	}
