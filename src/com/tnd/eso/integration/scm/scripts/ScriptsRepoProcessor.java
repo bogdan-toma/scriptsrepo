@@ -77,19 +77,7 @@ public class ScriptsRepoProcessor {
 					}
 				}
 
-				String fileIdentifier = "";
-
-				switch (ScriptsRepoApp.getProps().getProperty("REPOSITORY_FILE_ID")) {
-				case "EXTERNAL_ID":
-					fileIdentifier = script.getExternalId();
-					break;
-				case "DISPLAY_NAME":
-					fileIdentifier = script.getDisplayName();
-					break;
-				default:
-					break;
-				}
-
+				String fileIdentifier = script.getExternalId();
 				File scriptDataFile = repoParser.getFileContents(fileIdentifier);
 				if (!scriptDataFile.exists()) {
 					System.out.println("WARNING: File " + fileIdentifier + " does not exist in repository! Skipping.");

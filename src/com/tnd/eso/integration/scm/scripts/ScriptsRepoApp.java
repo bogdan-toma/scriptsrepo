@@ -143,13 +143,8 @@ public class ScriptsRepoApp {
 			changed = true;
 		}
 
-		if (prop.getProperty("REPOSITORY_FILE_ID") == null) {
-			prop.put("REPOSITORY_FILE_ID", "EXTERNAL_ID");
-			changed = true;
-		}
-
 		if (prop.getProperty("DATA_FILE_EXTENSION") == null) {
-			prop.put("DATA_FILE_EXTENSION", ".java");
+			prop.put("DATA_FILE_EXTENSION", ".bsh");
 			changed = true;
 		}
 
