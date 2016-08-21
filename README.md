@@ -4,14 +4,14 @@ ScriptsRepo is a tool that allows developers to automatically deploy BeanShell
 scripts from a locally managed repository to a SAP Sourcing application server.
 
 ## Latest release
-The most recent release is ScriptsRepo [0.4.1].
+The most recent release is ScriptsRepo [0.5].
 
 ## Installing ScriptsRepo
-Download latest release jar or build from [source].
+[Download latest release] jar or build from [source].
 ## Running ScriptsRepo
 ### Import
 ```sh
-java -jar scriptsrepo-0.4.1.jar --import
+java -jar scriptsrepo-0.5.jar --import
 ```
 - Initialise resources 
 - Generate [config.properties](#configuration) file *(only if not existent)*.
@@ -19,7 +19,7 @@ java -jar scriptsrepo-0.4.1.jar --import
 
 ###Deploy
 ```sh
-java -jar scriptsrepo-0.4.1.jar --deploy
+java -jar scriptsrepo-0.5.jar --deploy
 ```
 - Generate import metadata
 - Push data files and metadata to configured directory via deploy channel
@@ -30,10 +30,12 @@ The [import](#import) action will generate a `config.properties` file in the sam
     - `GIT`
     - `LOCAL` - *if files are just stored locally without any SCM*
 - **REPOSITORY_DIR** - *absolute path to location of script files*
-- **REPOSITORY_FILE_ID** - *must be a metadata of the script definition; this is used to link the script with the local file. eg: `EXTERNAL_ID`, where local file is named `EXTERNAL_ID`**.**`DATA_FILE_EXTENSION`*
+- **REPOSITORY_FILE_ID** - *DEPRECATED; script file is identified as EXTERNAL_ID+`DATA_FILE_EXTENSION`*
 - **DATA_FILE_EXTENSION** - *extension used for script files. eg `.java`*
 - **ESO_DATA_DIR** - *remote directory where to publish script data files*
 - **ESO_UPLOAD_DIR** - *remote directory where to publish script import medatada xml*
+- **ESO_VERSION** - *SAP Sourcing major realease number. eg `10`*
+- **DEPLOY_INACTIVE** - *Control the publishing of inactive scripts from repository*
 - **TRANSPORT_PROTOCOL** - *transport protocol for scripts deployment to app server*
     - `SFTP`
     - `DUMMY` - *test protocol, displays resulting metadata xml to console*
@@ -43,5 +45,6 @@ The [import](#import) action will generate a `config.properties` file in the sam
 - **PASS** - *SSH password*
 
 
-[0.4.1]:https://sourceforge.net/projects/scriptsrepo/
+[0.5]:https://sourceforge.net/projects/scriptsrepo/
 [source]:https://github.com/bogdan-toma/scriptsrepo
+[Download latest release]:https://sourceforge.net/projects/scriptsrepo/files/latest/download
