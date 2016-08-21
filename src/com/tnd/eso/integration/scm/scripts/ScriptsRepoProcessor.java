@@ -18,29 +18,30 @@
 package com.tnd.eso.integration.scm.scripts;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+import org.simpleframework.xml.strategy.Strategy;
+import org.simpleframework.xml.strategy.Type;
+import org.simpleframework.xml.strategy.Visitor;
+import org.simpleframework.xml.strategy.VisitorStrategy;
+import org.simpleframework.xml.stream.InputNode;
+import org.simpleframework.xml.stream.NodeMap;
+import org.simpleframework.xml.stream.OutputNode;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.sun.org.apache.xerces.internal.parsers.DOMParser;
+import com.tnd.eso.integration.scm.scripts.model.XmlDataStore;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptDefinitionBo;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptExplicitBo;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptIface;
 import com.tnd.eso.integration.scm.scripts.repository.ReposioryParserFactory;
 import com.tnd.eso.integration.scm.scripts.repository.RepositoryParser;
 import com.tnd.eso.integration.scm.scripts.transporter.Transporter;
 import com.tnd.eso.integration.scm.scripts.transporter.TransporterFactory;
-import com.tnd.eso.integration.scm.scripts.util.XmlHelper;
 
 public class ScriptsRepoProcessor {
-	XmlHelper helper;
-	DOMParser domParser;
-	Document doc;
-	NodeList root;
+	private XmlDataStore xmlDataStore;
 	private String ESO_DATA_DIR;
 	private String ESO_UPLOAD_DIR;
 
@@ -50,7 +51,7 @@ public class ScriptsRepoProcessor {
 	protected ScriptsRepoProcessor() {
 	}
 
-	public ScriptsRepoProcessor(String fileName) {
+	public ScriptsRepoProcessor(String dataStoreLocation) throws Exception {
 		ESO_DATA_DIR = ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR");
 		ESO_UPLOAD_DIR = ScriptsRepoApp.getProps().getProperty("ESO_UPLOAD_DIR");
 		repoParser = ReposioryParserFactory.getParser();
@@ -58,59 +59,44 @@ public class ScriptsRepoProcessor {
 		transporter = TransporterFactory.getTransporter();
 		transporter.setWorkingDir(ESO_DATA_DIR);
 
-		domParser = new DOMParser();
-
-		try {
-			helper = new XmlHelper();
-			domParser.parse(fileName);
-			doc = domParser.getDocument();
-
-			root = doc.getChildNodes();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Serializer serializer = new Persister();
+		File dataStore = new File(dataStoreLocation);
+		xmlDataStore = serializer.read(XmlDataStore.class, dataStore);
 	}
 
 	public void process() {
+		List<XmlScriptIface> scripts = xmlDataStore.getScripts();
 		try {
-			Node sapesourcing = helper.getNode("sapesourcing", root);
-			Node objects = helper.getNode("objects", sapesourcing.getChildNodes());
-			NodeList objectList = objects.getChildNodes();
+			for (int i = scripts.size() - 1; i >= 0; i--) {
+				XmlScriptIface script = scripts.get(i);
 
-			for (int i = 0; i < objectList.getLength(); i++) {
-				Node object = objectList.item(i);
+				if (!Boolean.valueOf(ScriptsRepoApp.getProps().getProperty("DEPLOY_INACTIVE"))) {
+					if (Boolean.valueOf(script.getInactive())) {
+						scripts.remove(i);
+						continue;
+					}
+				}
 
-				if (!"object".equals(object.getNodeName()))
-					continue;
-
-				Node fields = helper.getNode("fields", object.getChildNodes());
-				NodeList fieldList = fields.getChildNodes();
-
-				String objectType = helper.getNodeAttr("classname", object);
-				String fileIdentifier = helper.getNodeValue(ScriptsRepoApp.getProps().getProperty("REPOSITORY_FILE_ID"), fieldList);
-
+				String fileIdentifier = script.getExternalId();
 				File scriptDataFile = repoParser.getFileContents(fileIdentifier);
 				if (!scriptDataFile.exists()) {
 					System.out.println("WARNING: File " + fileIdentifier + " does not exist in repository! Skipping.");
+					scripts.remove(i);
 					continue;
 				}
 
-				if ("doccommon.scripting.script_definition".equals(objectType)) {
-					helper.setNodeValue("SCRIPT_VERSION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
-				}
-				// disabled due to broken SAP importer
-				else if ("odp.doccommon.scripting.callable_script".equals(objectType)) {
-					helper.setNodeValue("DOCUMENT_DESCRIPTION", fieldList, repoParser.getLastCommitRevision(fileIdentifier + ".java"));
+				String version = repoParser.getLastCommitRevision(fileIdentifier + ScriptsRepoApp.getProps().getProperty("DATA_FILE_EXTENSION"));
+
+				if ("doccommon.scripting.script_definition".equals(script.getType())) {
+					((XmlScriptDefinitionBo) script).setScriptVersion(version);
+				} else if ("odp.doccommon.scripting.callable_script".equals(script.getType())) {
+					((XmlScriptExplicitBo) script).setDocumentDescription(version);
 				}
 
-				helper.setNodeValue("SCRIPT", fieldList, ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR") + fileIdentifier + ScriptsRepoApp.getProps().getProperty("DATA_FILE_EXTENSION"));
-
+				script.setScript(ScriptsRepoApp.getProps().getProperty("ESO_DATA_DIR") + fileIdentifier + ScriptsRepoApp.getProps().getProperty("DATA_FILE_EXTENSION"));
 				transporter.transport(scriptDataFile);
 				System.out.println("Processed: " + fileIdentifier);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
 		} finally {
 			repoParser.close();
 		}
@@ -125,15 +111,28 @@ public class ScriptsRepoProcessor {
 	}
 
 	private File export() {
+
 		try {
 			File temp = File.createTempFile("ZTND_SCRIPT_DEF_", ".xml");
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(temp);
-			transformer.transform(source, result);
+
+			Strategy strategy = new VisitorStrategy(new Visitor() {
+				List<String> list = Arrays.asList(new String[] { "objects", "object" });
+
+				@Override
+				public void read(Type arg0, NodeMap<InputNode> arg1) throws Exception {
+				}
+
+				@Override
+				public void write(Type arg0, NodeMap<OutputNode> arg1) throws Exception {
+					if (list.contains(arg1.getName())) {
+						arg1.remove("class");
+					}
+				}
+			});
+
+			Serializer serializer = new Persister(strategy);
+			serializer.write(xmlDataStore, temp);
+
 			return temp;
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -19,18 +19,25 @@ package com.tnd.eso.integration.scm.scripts.init;
 
 import java.io.File;
 
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import com.tnd.eso.integration.scm.scripts.ScriptsRepoApp;
+import com.tnd.eso.integration.scm.scripts.model.XmlDataStore;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptDefinitionBo;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptExplicitBo;
+import com.tnd.eso.integration.scm.scripts.model.XmlScriptIface;
 import com.tnd.eso.integration.scm.scripts.util.XmlHelper;
 import com.tnd.eso.integration.scm.scripts.util.ZipHelper;
 
 public class TemplateGenerator {
 	private final String path;
 	private final String ZIP_TEMP_DIR = "allscripts" + File.separator;
+	private final String DUMMY_TEXT = "DUMMY";
 	private XmlHelper helper;
 
 	public TemplateGenerator(String currentPath) {
@@ -62,7 +69,7 @@ public class TemplateGenerator {
 			Node fciObjects = helper.getNode("fciObjects", root);
 			NodeList objectList = fciObjects.getChildNodes();
 
-			XmlTemplateGenerator xmlTemplateGenerator = new XmlTemplateGenerator(path);
+			XmlDataStore xmlDataStore = new XmlDataStore();
 
 			for (int i = 0; i < objectList.getLength(); i++) {
 				Node object = objectList.item(i);
@@ -70,15 +77,29 @@ public class TemplateGenerator {
 					continue;
 
 				String objectType = helper.getNodeAttr("class", object);
-				if (!"doccommon.scripting.script_definition".equals(objectType))
-					continue;
-
 				Node fields = helper.getNode("fields", object.getChildNodes());
 
-				xmlTemplateGenerator.addScript(generateBo(fields));
+				XmlScriptIface script;
+				switch (objectType) {
+				case "doccommon.scripting.script_definition":
+					script = generateScriptDefinitionBo(fields, objectType);
+					xmlDataStore.getScripts().add(script);
+					System.out.println("Processed import: " + script.getDisplayName());
+					break;
+				case "odp.doccommon.scripting.callable_script":
+					// Import Explicitly Called Scripts only for ESO V10+
+					if (Integer.valueOf(ScriptsRepoApp.getProps().getProperty("ESO_VERSION")).compareTo(10) >= 0) {
+						script = generateExplicitScriptBo(fields, objectType);
+						xmlDataStore.getScripts().add(script);
+						System.out.println("Processed import: " + script.getDisplayName());
+					}
+					break;
+				default:
+					continue;
+				}
 			}
 
-			xmlTemplateGenerator.write();
+			serialize(xmlDataStore);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -100,9 +121,11 @@ public class TemplateGenerator {
 			oldTemplate.delete();
 	}
 
-	private XmlImportScriptBo generateBo(Node node) {
+	private XmlScriptIface generateScriptDefinitionBo(Node node, String type) {
+		XmlScriptDefinitionBo xmlImportScript = new XmlScriptDefinitionBo();
+		xmlImportScript.setType(type);
+
 		NodeList fieldList = node.getChildNodes();
-		XmlImportScriptBo xmlImportScript = new XmlImportScriptBo();
 
 		for (int j = 0; j < fieldList.getLength(); j++) {
 			Node field = fieldList.item(j);
@@ -143,9 +166,51 @@ public class TemplateGenerator {
 				break;
 			}
 		}
-		xmlImportScript.setScriptVersion("DUMMY");
-		xmlImportScript.setScript("DUMMY");
+		xmlImportScript.setScriptVersion(DUMMY_TEXT);
+		xmlImportScript.setScript(DUMMY_TEXT);
 
 		return xmlImportScript;
+	}
+
+	private XmlScriptIface generateExplicitScriptBo(Node node, String type) {
+		XmlScriptExplicitBo xmlImportScript = new XmlScriptExplicitBo();
+		xmlImportScript.setType(type);
+
+		NodeList fieldList = node.getChildNodes();
+
+		for (int j = 0; j < fieldList.getLength(); j++) {
+			Node field = fieldList.item(j);
+			if (!"field".equals(field.getNodeName()))
+				continue;
+
+			String fieldType = helper.getNodeAttr("name", field);
+
+			switch (fieldType) {
+			case "EXTERNAL_ID":
+				xmlImportScript.setExternalId(helper.getNodeValue(field));
+				break;
+			case "DISPLAY_NAME":
+				xmlImportScript.setDisplayName(helper.getNodeValue(field));
+				break;
+			case "DOCUMENT_DESCRIPTION":
+				xmlImportScript.setDocumentDescription(helper.getNodeValue(field));
+				break;
+			case "INACTIVE":
+				xmlImportScript.setInactive(helper.getNodeValue(field));
+				break;
+			default:
+				break;
+			}
+		}
+		xmlImportScript.setDocumentDescription(DUMMY_TEXT);
+		xmlImportScript.setScript(DUMMY_TEXT);
+
+		return xmlImportScript;
+	}
+
+	private void serialize(XmlDataStore xmlDataStore) throws Exception {
+		Serializer serializer = new Persister();
+		File result = new File(path + ScriptsRepoApp.RESOURCES_DIR + File.separator + ScriptsRepoApp.TEMPLATE_FILENAME);
+		serializer.write(xmlDataStore, result);
 	}
 }

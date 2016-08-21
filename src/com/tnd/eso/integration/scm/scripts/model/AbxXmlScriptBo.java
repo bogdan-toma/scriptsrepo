@@ -15,20 +15,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-package com.tnd.eso.integration.scm.scripts.init;
+package com.tnd.eso.integration.scm.scripts.model;
 
-public class XmlImportScriptBo {
+import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Path;
+
+public class AbxXmlScriptBo implements XmlScriptIface {
+	@Attribute(name = "classname")
+	private String type;
+
+	@Element(name = "EXTERNAL_ID")
+	@Path("fields")
 	private String externalId;
+
+	@Element(name = "DISPLAY_NAME")
+	@Path("fields")
 	private String displayName;
-	private String scriptContext;
-	private String busUnitContext;
-	private String targetClassId;
-	private String targetInstanceType;
-	private String target;
+
+	@Element(name = "DOCUMENT_DESCRIPTION")
+	@Path("fields")
 	private String documentDescription;
-	private String inactive;
-	private String scriptVersion;
+
+	@Element(name = "SCRIPT")
+	@Path("fields")
 	private String script;
+
+	@Element(name = "INACTIVE")
+	@Path("fields")
+	private String inactive;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public String getExternalId() {
 		return externalId;
@@ -46,47 +69,6 @@ public class XmlImportScriptBo {
 		this.displayName = displayName;
 	}
 
-	public String getScriptContext() {
-		return scriptContext;
-	}
-
-	public void setScriptContext(String scriptContext) {
-		this.scriptContext = scriptContext;
-	}
-
-	public String getBusUnitContext() {
-		return busUnitContext;
-	}
-
-	public void setBusUnitContext(String busUnitContext) {
-		String[] ctxInfo = busUnitContext.split("\\$");
-		this.busUnitContext = ctxInfo[3];
-	}
-
-	public String getTargetClassId() {
-		return targetClassId;
-	}
-
-	public void setTargetClassId(String targetClassId) {
-		this.targetClassId = targetClassId;
-	}
-
-	public String getTargetInstanceType() {
-		return targetInstanceType;
-	}
-
-	public void setTargetInstanceType(String targetInstanceType) {
-		this.targetInstanceType = targetInstanceType;
-	}
-
-	public String getTarget() {
-		return target;
-	}
-
-	public void setTarget(String target) {
-		this.target = target;
-	}
-
 	public String getDocumentDescription() {
 		return documentDescription;
 	}
@@ -95,27 +77,19 @@ public class XmlImportScriptBo {
 		this.documentDescription = documentDescription;
 	}
 
-	public String getInactive() {
-		return inactive;
-	}
-
-	public void setInactive(String inactive) {
-		this.inactive = inactive;
-	}
-
-	public String getScriptVersion() {
-		return scriptVersion;
-	}
-
-	public void setScriptVersion(String scriptVersion) {
-		this.scriptVersion = scriptVersion;
-	}
-
 	public String getScript() {
 		return script;
 	}
 
 	public void setScript(String script) {
 		this.script = script;
+	}
+
+	public String getInactive() {
+		return inactive;
+	}
+
+	public void setInactive(String inactive) {
+		this.inactive = inactive;
 	}
 }
